@@ -77,7 +77,7 @@ export namespace ctext::hooks {
 		if (!std::filesystem::exists("mods"))
 			return;
 
-		const auto& loadOrder = ctext::Config::Get().ModLoadOrder;
+		const auto& loadOrder = ctext::Config::Get().ModsLoadOrder;
 
 		for (const auto& load : loadOrder) {
 			auto modPath = "mods" / std::filesystem::path(load);

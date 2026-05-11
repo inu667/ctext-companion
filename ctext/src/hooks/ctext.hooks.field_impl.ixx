@@ -25,7 +25,7 @@ namespace {
 
 export namespace ctext::hooks {
 	void EnableFieldImplHooks() {
-		if (ctext::Config::Get().RevertDiagonalMovement)
+		if (ctext::Config::Get().FixesRevertDiagonalMovement)
 			ENABLE_HOOK(FieldImpl_UserScrollDiagonal, 0x175DA0);
 	}
 }

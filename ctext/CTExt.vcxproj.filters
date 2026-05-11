@@ -171,6 +171,9 @@
     <ClCompile Include="src\ctext.config.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\hooks\ctext.hooks.ctr.resource_manager.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\helpers.hpp">

@@ -16,28 +16,32 @@ export namespace ctext {
 			std::ifstream file("ctext.json");
 			auto cfg = nlohmann::json::parse(file, nullptr, true, true, true);
 
-			RevertDiagonalMovement = cfg["fixes"]["revert_diagonal_movement"];
+			FixesRevertDiagonalMovement = cfg["fixes"]["revert_diagonal_movement"];
 
-			ForceNearestFilter = cfg["font"]["force_nearest_filter"];
-			UseCustomFont = cfg["font"]["use_custom_font"];
-			CustomFont = cfg["font"]["custom_font"];
-			UseFixedFontSize = cfg["font"]["use_fixed_font_size"];
-			FixedFontSize = cfg["font"]["fixed_font_size"];
+			GraphicsForceNearestFilter = cfg["graphics"]["force_nearest_filter"];
 
-			ModLoadOrder = cfg["mods"]["load_order"];
+			FontForceNearestFilter = cfg["font"]["force_nearest_filter"];
+			FontUseCustomFont = cfg["font"]["use_custom_font"];
+			FontCustomFont = cfg["font"]["custom_font"];
+			FontUseFixedFontSize = cfg["font"]["use_fixed_font_size"];
+			FontFixedFontSize = cfg["font"]["fixed_font_size"];
+
+			ModsLoadOrder = cfg["mods"]["load_order"];
 
 			file.close();
 		}
 
 
-		bool RevertDiagonalMovement;
+		bool FixesRevertDiagonalMovement;
 
-		bool ForceNearestFilter;
-		bool UseCustomFont;
-		std::string CustomFont;
-		bool UseFixedFontSize;
-		int FixedFontSize;
+		bool GraphicsForceNearestFilter;
 
-		std::vector<std::string> ModLoadOrder;
+		bool FontForceNearestFilter;
+		bool FontUseCustomFont;
+		std::string FontCustomFont;
+		bool FontUseFixedFontSize;
+		int FontFixedFontSize;
+
+		std::vector<std::string> ModsLoadOrder;
 	};
 }

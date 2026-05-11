@@ -5,6 +5,7 @@ module;
 export module ctext.hooks;
 
 import :ctr;
+import :ctr.resource_manager;
 import :detchman_resource;
 import :field_impl;
 import :msg_window;
@@ -22,6 +23,7 @@ export namespace ctext::hooks {
 		EnableDetchmanResourceHooks();
 		EnableFieldImplHooks();
 		EnableCtrHooks();
+		EnableCtrResourceManagerHooks();
 		EnableSoundManagerHooks();
 
 #ifdef FEATURE_VOICE_ACTING

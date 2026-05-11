@@ -18,7 +18,7 @@ namespace {
 	cocos2d::TTFConfig& GetTtfConfig(int fontSize) {
 		if (!ttfConfigs.contains(fontSize)) {
 			auto path = std::filesystem::current_path();
-			path /= ctext::Config::Get().CustomFont;
+			path /= ctext::Config::Get().FontCustomFont;
 
 			cocos2d::TTFConfig ttfConfig;
 			ttfConfig.fontSize = static_cast<float>(fontSize);
@@ -36,15 +36,15 @@ namespace {
 
 		cocos2d::Label* label = nullptr;
 
-		if (cfg.UseCustomFont) {
-			const auto& ttfConfig = GetTtfConfig(cfg.UseFixedFontSize ? cfg.FixedFontSize : fontSize);
+		if (cfg.FontUseCustomFont) {
+			const auto& ttfConfig = GetTtfConfig(cfg.FontUseFixedFontSize ? cfg.FontFixedFontSize : fontSize);
 			label = cocos2d::Label::create();
 			label->setTTFConfig(ttfConfig);
 			label->setString(text);
 		} else
-			label = CALL_ORIG(ctr_CreateLabel, text, cfg.UseFixedFontSize ? cfg.FixedFontSize : fontSize);
+			label = CALL_ORIG(ctr_CreateLabel, text, cfg.FontUseFixedFontSize ? cfg.FontFixedFontSize : fontSize);
 
-		if (cfg.ForceNearestFilter)
+		if (cfg.FontForceNearestFilter)
 			label->getFontAtlas()->setAliasTexParameters();
 
 		return label;

@@ -3,6 +3,10 @@
 		"revert_diagonal_movement": true
 	},
 
+	"graphics": {
+		"force_nearest_filter": true
+	},
+
 	"font": {
 		"force_nearest_filter": true,
 
