@@ -10,6 +10,7 @@ import :detchman_resource;
 import :field_impl;
 import :msg_window;
 import :name_input_scene;
+import :render;
 import :sound_mananger;
 import :sound_task;
 import :text_manager;
@@ -21,16 +22,17 @@ export namespace ctext::hooks {
 	}
 
 	void EnableHooks() {
-		EnableDetchmanResourceHooks();
-		EnableFieldImplHooks();
 		EnableCtrHooks();
 		EnableCtrResourceManagerHooks();
+		EnableDetchmanResourceHooks();
+		EnableFieldImplHooks();
+		EnableRenderHooks();
 		EnableSoundManagerHooks();
 		EnableSoundTaskHooks();
 
 #ifdef FEATURE_VOICE_ACTING
-		EnableNameInputSceneHooks();
 		EnableMsgWindowHooks();
+		EnableNameInputSceneHooks();
 		EnableTextManagerHooks();
 #endif
 	}

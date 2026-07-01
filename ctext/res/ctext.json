@@ -17,6 +17,10 @@
 		"fixed_font_size": 16
 	},
 
+	"misc": {
+		"disable_field_action_indicator": true
+	},
+
 	"mods": {
 		"load_order": [
 

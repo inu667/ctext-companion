@@ -49,12 +49,15 @@ extern void* baseAddress;
 	__arg_ret_type_ __fastcall __arg_name_##_HOOK(__arg_class_type_* _this, void* _ __VA_OPT__(,) __VA_ARGS__)
 
 #define HOOK_CLSFN(__arg_name_, __arg_class_type_, ...) \
-	HOOK_CLSFN_RET(__arg_name_, void, __arg_class_type_, __VA_ARGS__)
+	HOOK_CLSFN_RET(__arg_name_, void, __arg_class_type_ __VA_OPT__(,) __VA_ARGS__)
 
 #define HOOK_RET(__arg_name_, __arg_call_sig_, __arg_ret_type_, ...) \
 	typedef __arg_ret_type_(__arg_call_sig_* __arg_name_##_SIG)(__VA_ARGS__); \
     __arg_name_##_SIG __arg_name_##_ORIG = nullptr; \
 	__arg_ret_type_ __arg_call_sig_ __arg_name_##_HOOK(__VA_ARGS__)
+
+#define HOOK(__arg_name_, __arg_call_sig_, ...) \
+	HOOK_RET(__arg_name_, __arg_call_sig_, void __VA_OPT__(,) __VA_ARGS__)
 
 #define CALL_ORIG(__arg_name_, ...) \
 	__arg_name_##_ORIG(__VA_ARGS__)

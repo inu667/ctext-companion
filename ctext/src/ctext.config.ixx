@@ -26,6 +26,8 @@ export namespace ctext {
 			FontUseFixedFontSize = cfg["font"]["use_fixed_font_size"];
 			FontFixedFontSize = cfg["font"]["fixed_font_size"];
 
+			MiscDisableFieldActionIndicator = cfg["misc"]["disable_field_action_indicator"];
+
 			ModsLoadOrder = cfg["mods"]["load_order"];
 
 			file.close();
@@ -41,6 +43,8 @@ export namespace ctext {
 		std::string FontCustomFont;
 		bool FontUseFixedFontSize;
 		int FontFixedFontSize;
+
+		bool MiscDisableFieldActionIndicator;
 
 		std::vector<std::string> ModsLoadOrder;
 	};

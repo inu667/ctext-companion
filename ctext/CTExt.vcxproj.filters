@@ -177,6 +177,9 @@
     <ClCompile Include="src\hooks\ctext.hooks.sound_task.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\hooks\ctext.hooks.render.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\helpers.hpp">
