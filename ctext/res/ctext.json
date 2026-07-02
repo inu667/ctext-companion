@@ -21,6 +21,13 @@
 		"disable_field_action_indicator": true
 	},
 
+	"companion": {
+		"enabled": true,
+		"poll_interval_ms": 1000,
+		"export_path": "",
+		"storyline_rva": 0
+	},
+
 	"mods": {
 		"load_order": [
 

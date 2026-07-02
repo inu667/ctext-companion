@@ -6,6 +6,7 @@ export module ctext.hooks:field_impl;
 
 import ct;
 import ctext.config;
+import ctext.companion_export;
 
 
 namespace {
@@ -19,6 +20,9 @@ namespace {
 
 		dword854[40] = dword854[38];
 		dword854[43] = dword854[41];
+
+		if (ctext::Config::Get().CompanionEnabled)
+			ctext::companion::CompanionExport::Get().RequestExport();
 	}
 }
 

@@ -6,6 +6,7 @@
 
 import ctext.hooks;
 import ctext.config;
+import ctext.companion_export;
 
 
 // For DisableThreadLibraryCalls, LoadLibrary, GetSystemDirectory
@@ -51,11 +52,13 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 
 			ctext::hooks::InitialiseHooks();
 			ctext::hooks::EnableHooks();
+			ctext::companion::CompanionExport::Get().Start();
 
 			break;
 		}
 
 		case DLL_PROCESS_DETACH:
+			ctext::companion::CompanionExport::Get().Stop();
 			ctext::hooks::UninitialiseHooks();
 
 			MH_Uninitialize();

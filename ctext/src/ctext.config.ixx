@@ -30,7 +30,18 @@ export namespace ctext {
 
 			ModsLoadOrder = cfg["mods"]["load_order"];
 
-			file.close();
+			CompanionEnabled = false;
+			CompanionPollIntervalMs = 1000;
+			CompanionExportPath = "";
+			CompanionStorylineRva = 0;
+
+			if (cfg.contains("companion") && cfg["companion"].is_object()) {
+				const auto& companion = cfg["companion"];
+				CompanionEnabled = companion.value("enabled", false);
+				CompanionPollIntervalMs = companion.value("poll_interval_ms", 1000);
+				CompanionExportPath = companion.value("export_path", "");
+				CompanionStorylineRva = companion.value("storyline_rva", 0);
+			}
 		}
 
 
@@ -47,5 +58,10 @@ export namespace ctext {
 		bool MiscDisableFieldActionIndicator;
 
 		std::vector<std::string> ModsLoadOrder;
+
+		bool CompanionEnabled;
+		int CompanionPollIntervalMs;
+		std::string CompanionExportPath;
+		int CompanionStorylineRva;
 	};
 }

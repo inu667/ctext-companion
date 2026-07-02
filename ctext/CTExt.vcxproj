@@ -102,6 +102,7 @@
     <ClCompile Include="..\modules\minhook\src\hook.c" />
     <ClCompile Include="..\modules\minhook\src\trampoline.c" />
     <ClCompile Include="src\ctext.audio_manager.ixx" />
+    <ClCompile Include="src\ctext.companion_export.ixx" />
     <ClCompile Include="src\ctext.config.ixx" />
     <ClCompile Include="src\ctext.ma_sound_task.ixx" />
     <ClCompile Include="src\ctext.singleton.ixx" />
