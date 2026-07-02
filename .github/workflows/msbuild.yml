@@ -24,7 +24,7 @@ jobs:
         configuration: [Debug, Release]
 
     env:
-      SOLUTION_FILE_PATH: ./CTExt.vcxproj
+      SOLUTION_FILE_PATH: ./ctext.sln
       BUILD_CONFIGURATION: ${{matrix.configuration}}
 
     steps:
