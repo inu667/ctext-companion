@@ -83,18 +83,24 @@ export namespace ctext::companion {
 
 		void ExportOnce() {
 			auto* canvas = ct::ChronoCanvas::getInstance();
-			if (!canvas)
-				return;
 
 			nlohmann::json state;
 			state["version"] = 1;
 			state["source"] = "ctext";
-			state["fieldId"] = canvas->currentFieldId;
-			state["sceneId"] = ct::scene::SceneManager::nowScene();
 
-			state["party"] = nlohmann::json::array();
-			for (int i = 0; i < 3; ++i)
-				state["party"].push_back(canvas->activePartyMemberIds[i]);
+			if (canvas) {
+				state["fieldId"] = canvas->currentFieldId;
+				state["sceneId"] = ct::scene::SceneManager::nowScene();
+				state["party"] = nlohmann::json::array();
+				for (int i = 0; i < 3; ++i)
+					state["party"].push_back(canvas->activePartyMemberIds[i]);
+			}
+			else {
+				state["fieldId"] = nullptr;
+				state["sceneId"] = nullptr;
+				state["party"] = nlohmann::json::array();
+				state["exportStatus"] = "no_canvas";
+			}
 
 			if (Config::Get().CompanionStorylineRva != 0) {
 				auto* storyline = ADDR_AS(uint8_t*, Config::Get().CompanionStorylineRva);
