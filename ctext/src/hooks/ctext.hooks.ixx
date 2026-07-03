@@ -11,6 +11,7 @@ import :field_impl;
 import :msg_window;
 import :name_input_scene;
 import :render;
+import :scene_manager;
 import :sound_mananger;
 import :sound_task;
 import :text_manager;
@@ -26,6 +27,7 @@ export namespace ctext::hooks {
 		EnableCtrResourceManagerHooks();
 		EnableDetchmanResourceHooks();
 		EnableFieldImplHooks();
+		EnableSceneManagerHooks();
 		EnableRenderHooks();
 		EnableSoundManagerHooks();
 		EnableSoundTaskHooks();

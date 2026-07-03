@@ -28,7 +28,7 @@ VM feasibility on your Linux box: see `docs/VM_FEASIBILITY.md` (RAM too tight ri
 1. Open `ctext.sln` in Visual Studio 2022.
 2. Configuration: **Release**, platform: **Win32** (x86).
 3. Build **CTExt**.
-4. Output: `build/Release/ctext.dll`.
+4. Output: `build/Release/ctext.dll` (platform **x86** / Win32).
 
 ## Install on Linux (Proton)
 
@@ -42,7 +42,17 @@ cp /path/from/windows/ctext.dll ctext-build/release/
 ```
 
 Launch Chrono Trigger from Steam. The companion **Game link** panel should show
-`fieldId` updating as you move.
+**map scene** ID (unique per map). `fieldId` is also exported for debug but
+**repeats across different places on PC** — do not use it alone for location.
+
+Export JSON (v2) includes:
+
+| Field | Meaning |
+|-------|---------|
+| `mapSceneId` | `pushScene` map index — **use this for location mapping** |
+| `fieldId` | `ChronoCanvas::currentFieldId` — **not unique** on PC |
+| `sceneId` | Scene mode (16 = world map, 17 = field mode) |
+| `posX`, `posY` | Player tile position (updated on movement) |
 
 ## Config (`ctext.json`)
 
@@ -67,5 +77,5 @@ Proton save folder:
 Without the game, test the bridge path:
 
 ```bash
-python3 scripts/mock-companion-state.py --field-id 42
+python3 scripts/mock-companion-state.py --map-scene-id 42 --field-id 3 --scene-id 17
 ```

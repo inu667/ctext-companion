@@ -142,6 +142,7 @@
     <ClCompile Include="src\hooks\ctext.hooks.name_input_scene.ixx" />
     <ClCompile Include="src\dllmain.cpp" />
     <ClCompile Include="src\hooks\ctext.hooks.field_impl.ixx" />
+    <ClCompile Include="src\hooks\ctext.hooks.scene_manager.ixx" />
     <ClCompile Include="src\hooks\ctext.hooks.ixx" />
     <ClCompile Include="src\hooks\ctext.hooks.sqexlogo.ixx" />
     <ClCompile Include="src\io\ctext.io.filesystem_file_entry.ixx" />

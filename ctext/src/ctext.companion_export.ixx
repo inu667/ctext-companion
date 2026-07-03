@@ -54,6 +54,18 @@ export namespace ctext::companion {
 			exportRequested_ = true;
 		}
 
+		/** CTViewer / pushScene map index — unique per field map on PC. */
+		void OnMapScene(int id) {
+			if (id >= 0)
+				mapSceneId_.store(id, std::memory_order_relaxed);
+			exportRequested_ = true;
+		}
+
+		void OnPlayerPosition(int x, int y) {
+			playerX_.store(x, std::memory_order_relaxed);
+			playerY_.store(y, std::memory_order_relaxed);
+		}
+
 	private:
 		std::filesystem::path ResolveExportPath(const std::string& configured) {
 			if (!configured.empty())
@@ -93,10 +105,11 @@ export namespace ctext::companion {
 			auto* canvas = ct::ChronoCanvas::getInstance();
 
 			nlohmann::json state;
-			state["version"] = 1;
+			state["version"] = 2;
 			state["source"] = "ctext";
 
 			if (canvas) {
+				// currentFieldId is NOT a unique location on PC (repeats across maps).
 				state["fieldId"] = canvas->currentFieldId;
 				state["sceneId"] = ct::scene::SceneManager::nowScene();
 				state["party"] = nlohmann::json::array();
@@ -110,6 +123,11 @@ export namespace ctext::companion {
 				state["exportStatus"] = "no_canvas";
 			}
 
+			const int mapSceneId = mapSceneId_.load(std::memory_order_relaxed);
+			state["mapSceneId"] = mapSceneId >= 0 ? mapSceneId : nullptr;
+			state["posX"] = playerX_.load(std::memory_order_relaxed);
+			state["posY"] = playerY_.load(std::memory_order_relaxed);
+
 			if (Config::Get().CompanionStorylineRva != 0) {
 				auto* storyline = ADDR_AS(uint8_t*, Config::Get().CompanionStorylineRva);
 				state["storyline"] = *storyline;
@@ -121,7 +139,6 @@ export namespace ctext::companion {
 			state["inBattle"] = false;
 			state["eventFlags"] = nlohmann::json::object();
 
-			// ISO8601 UTC timestamp (companion accepts standard parse)
 			const auto now = std::chrono::system_clock::now();
 			const std::time_t tt = std::chrono::system_clock::to_time_t(now);
 			std::tm utc{};
@@ -138,7 +155,6 @@ export namespace ctext::companion {
 				out << state.dump(2) << "\n";
 			}
 			catch (...) {
-				// Silent fail — companion is optional
 			}
 		}
 
@@ -146,5 +162,8 @@ export namespace ctext::companion {
 		std::thread worker_;
 		std::atomic<bool> running_{ false };
 		std::atomic<bool> exportRequested_{ false };
+		std::atomic<int> mapSceneId_{ -1 };
+		std::atomic<int> playerX_{ 0 };
+		std::atomic<int> playerY_{ 0 };
 	};
 }
