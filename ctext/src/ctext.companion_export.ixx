@@ -54,39 +54,26 @@ export namespace ctext::companion {
 			exportRequested_ = true;
 		}
 
-		/** Fallback — pushScene's first arg is often 0 (scene type), not the map index. */
-		void OnMapScene(int id) {
-			if (id > 0)
-				mapSceneId_.store(id, std::memory_order_relaxed);
+		/** Parsed from mapinfo_N.dat header — unique per room/map on PC. */
+		void OnLocationLoaded(int mapinfoId, int mapTableId, int scriptId) {
+			if (mapinfoId > 0)
+				mapinfoId_.store(mapinfoId, std::memory_order_relaxed);
+			if (mapTableId > 0)
+				mapTableId_.store(mapTableId, std::memory_order_relaxed);
+			if (scriptId > 0)
+				scriptId_.store(scriptId, std::memory_order_relaxed);
 			exportRequested_ = true;
 		}
 
-		/** Primary source — CTViewer scene index from mapinfo_N.dat load. */
-		void OnMapinfoIndex(int index) {
-			if (index > 0)
-				mapSceneId_.store(index, std::memory_order_relaxed);
-			exportRequested_ = true;
-		}
-
-		/** Called on the game thread from FieldImpl hook — copy values, never retain impl*. */
+		/** Called on the game thread from FieldImpl hook — position only, never map id. */
 		void OnFieldImpl(ct::FieldImpl* impl) {
 			if (!impl)
 				return;
-
-			const int mapId = PickMapSceneId(impl);
-			if (mapId > 0)
-				mapSceneId_.store(mapId, std::memory_order_relaxed);
 
 			if (impl->dword854) {
 				playerX_.store(impl->dword854[38], std::memory_order_relaxed);
 				playerY_.store(impl->dword854[41], std::memory_order_relaxed);
 			}
-
-			probeBA0_.store(impl->dwordBA0, std::memory_order_relaxed);
-			probeBBC_.store(impl->dwordBBC, std::memory_order_relaxed);
-			probeBB8_.store(impl->dwordBB8, std::memory_order_relaxed);
-			probeBC0_.store(impl->wordBC0, std::memory_order_relaxed);
-			probeValid_.store(true, std::memory_order_relaxed);
 
 			exportRequested_ = true;
 		}
@@ -126,35 +113,14 @@ export namespace ctext::companion {
 			}
 		}
 
-		static int PickMapSceneId(ct::FieldImpl* impl) {
-			if (!impl)
-				return -1;
-
-			// CTViewer / mapinfo index — dwordBA0 is the reliable per-map id on PC.
-			const int candidates[] = {
-				static_cast<int>(impl->dwordBA0),
-				static_cast<int>(impl->dwordBBC),
-				static_cast<int>(impl->dwordBB8),
-				static_cast<int>(impl->wordBC0),
-			};
-
-			for (const int id : candidates) {
-				if (id > 0)
-					return id;
-			}
-
-			return -1;
-		}
-
 		void ExportOnce() {
 			auto* canvas = ct::ChronoCanvas::getInstance();
 
 			nlohmann::json state;
-			state["version"] = 3;
+			state["version"] = 4;
 			state["source"] = "ctext";
 
 			if (canvas) {
-				// currentFieldId is NOT a unique location on PC (repeats across maps).
 				state["fieldId"] = canvas->currentFieldId;
 				state["sceneId"] = ct::scene::SceneManager::nowScene();
 				state["party"] = nlohmann::json::array();
@@ -168,22 +134,37 @@ export namespace ctext::companion {
 				state["exportStatus"] = "no_canvas";
 			}
 
-			const int mapSceneId = mapSceneId_.load(std::memory_order_relaxed);
-			if (mapSceneId > 0)
-				state["mapSceneId"] = mapSceneId;
-			else
+			const int mapinfoId = mapinfoId_.load(std::memory_order_relaxed);
+			const int mapTableId = mapTableId_.load(std::memory_order_relaxed);
+			const int scriptId = scriptId_.load(std::memory_order_relaxed);
+
+			if (mapinfoId > 0) {
+				state["mapinfoId"] = mapinfoId;
+				state["mapSceneId"] = mapinfoId;
+			}
+			else {
+				state["mapinfoId"] = nullptr;
 				state["mapSceneId"] = nullptr;
+			}
+
+			if (mapTableId > 0)
+				state["mapTableId"] = mapTableId;
+			else
+				state["mapTableId"] = nullptr;
+
+			if (scriptId > 0)
+				state["scriptId"] = scriptId;
+			else
+				state["scriptId"] = nullptr;
+
+			if (mapinfoId > 0 && mapTableId > 0 && scriptId > 0) {
+				state["locationKey"] = std::to_string(mapinfoId) + ":"
+					+ std::to_string(mapTableId) + ":"
+					+ std::to_string(scriptId);
+			}
+
 			state["posX"] = playerX_.load(std::memory_order_relaxed);
 			state["posY"] = playerY_.load(std::memory_order_relaxed);
-
-			if (probeValid_.load(std::memory_order_relaxed)) {
-				state["locationProbe"] = {
-					{ "dwordBA0", probeBA0_.load(std::memory_order_relaxed) },
-					{ "dwordBBC", probeBBC_.load(std::memory_order_relaxed) },
-					{ "dwordBB8", probeBB8_.load(std::memory_order_relaxed) },
-					{ "wordBC0", probeBC0_.load(std::memory_order_relaxed) },
-				};
-			}
 
 			if (Config::Get().CompanionStorylineRva != 0) {
 				auto* storyline = ADDR_AS(uint8_t*, Config::Get().CompanionStorylineRva);
@@ -219,13 +200,10 @@ export namespace ctext::companion {
 		std::thread worker_;
 		std::atomic<bool> running_{ false };
 		std::atomic<bool> exportRequested_{ false };
-		std::atomic<int> mapSceneId_{ -1 };
+		std::atomic<int> mapinfoId_{ -1 };
+		std::atomic<int> mapTableId_{ -1 };
+		std::atomic<int> scriptId_{ -1 };
 		std::atomic<int> playerX_{ 0 };
 		std::atomic<int> playerY_{ 0 };
-		std::atomic<bool> probeValid_{ false };
-		std::atomic<uint32_t> probeBA0_{ 0 };
-		std::atomic<uint32_t> probeBBC_{ 0 };
-		std::atomic<uint32_t> probeBB8_{ 0 };
-		std::atomic<uint32_t> probeBC0_{ 0 };
 	};
 }

@@ -49,7 +49,11 @@ Export JSON (v3) includes:
 
 | Field | Meaning |
 |-------|---------|
-| `mapSceneId` | Parsed from `mapinfo_N.dat` on map load (CTViewer scene index) — **use for location mapping** |
+| `mapinfoId` | mapinfo file index (SNES location number on PC) |
+| `mapTableId` | MapTable layout index from mapinfo header |
+| `scriptId` | Atel script index from mapinfo header |
+| `locationKey` | `mapinfoId:mapTableId:scriptId` — **use for linking** |
+| `mapSceneId` | Alias for `mapinfoId` (legacy) |
 | `fieldId` | `ChronoCanvas::currentFieldId` — **not unique** on PC |
 | `sceneId` | Scene mode (16 = world map, 17 = field mode) |
 | `posX`, `posY` | Player tile position (from `FieldImpl`, polled each export) |

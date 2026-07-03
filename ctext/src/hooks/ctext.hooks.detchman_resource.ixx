@@ -81,12 +81,6 @@ namespace {
 		LOG_DEBUG("RES_HOOK: " << filename);
 #endif
 
-		if (ctext::Config::Get().CompanionEnabled) {
-			const int mapIndex = ParseMapinfoIndex(filename);
-			if (mapIndex > 0)
-				ctext::companion::CompanionExport::Get().OnMapinfoIndex(mapIndex);
-		}
-
 		std::string lcFilename = filename;
 		std::transform(
 			lcFilename.begin(),
@@ -95,16 +89,26 @@ namespace {
 			[](unsigned char c) { return std::tolower(c); }
 		);
 
+		uint8_t* buf = nullptr;
 		if (!overridenFilepaths.contains(lcFilename))
-			return CALL_ORIG(DetchmanResource_LoadFileEntry, filename, outLen);
-
-		const auto* entry = overridenFilepaths[lcFilename];
-
+			buf = CALL_ORIG(DetchmanResource_LoadFileEntry, filename, outLen);
+		else {
+			const auto* entry = overridenFilepaths[lcFilename];
 #if LOG_RES_HOOK
-		LOG_DEBUG("RES_HOOK: Redirecting to " << entry->GetFilePath());
+			LOG_DEBUG("RES_HOOK: Redirecting to " << entry->GetFilePath());
 #endif
+			buf = entry->GetData(outLen);
+		}
 
-		auto* buf = entry->GetData(outLen);
+		if (ctext::Config::Get().CompanionEnabled && buf && outLen) {
+			const int mapinfoId = ParseMapinfoIndex(filename);
+			const size_t len = *outLen;
+			if (mapinfoId > 0 && len >= 18) {
+				const int mapTableId = static_cast<int>(buf[12] | (buf[13] << 8));
+				const int scriptId = static_cast<int>(buf[16] | (buf[17] << 8));
+				ctext::companion::CompanionExport::Get().OnLocationLoaded(mapinfoId, mapTableId, scriptId);
+			}
+		}
 
 		return buf;
 	}
