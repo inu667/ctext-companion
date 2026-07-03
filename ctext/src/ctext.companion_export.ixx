@@ -124,7 +124,10 @@ export namespace ctext::companion {
 			}
 
 			const int mapSceneId = mapSceneId_.load(std::memory_order_relaxed);
-			state["mapSceneId"] = mapSceneId >= 0 ? mapSceneId : nullptr;
+			if (mapSceneId >= 0)
+				state["mapSceneId"] = mapSceneId;
+			else
+				state["mapSceneId"] = nullptr;
 			state["posX"] = playerX_.load(std::memory_order_relaxed);
 			state["posY"] = playerY_.load(std::memory_order_relaxed);
 
