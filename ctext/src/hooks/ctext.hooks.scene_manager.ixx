@@ -2,6 +2,8 @@ module;
 
 #include "helpers.hpp"
 
+#include <cocos/2d/CCScene.h>
+
 export module ctext.hooks:scene_manager;
 
 import ctext.companion_export;
@@ -9,22 +11,22 @@ import ctext.config;
 
 
 namespace {
-	HOOK(SceneManager_create, __fastcall, int, mapId, int, arg2) {
+	HOOK_RET(SceneManager_create, __fastcall, cocos2d::Scene*, int sceneIndex, int arg2) {
 		if (ctext::Config::Get().CompanionEnabled)
-			ctext::companion::CompanionExport::Get().OnMapScene(mapId);
-		return CALL_ORIG(SceneManager_create, mapId, arg2);
+			ctext::companion::CompanionExport::Get().OnMapScene(sceneIndex);
+		return CALL_ORIG(SceneManager_create, sceneIndex, arg2);
 	}
 
-	HOOK(SceneManager_pushScene, __fastcall, int, mapId, int, arg2) {
+	HOOK(SceneManager_pushScene, __fastcall, int sceneIndex, int arg2) {
 		if (ctext::Config::Get().CompanionEnabled)
-			ctext::companion::CompanionExport::Get().OnMapScene(mapId);
-		CALL_ORIG(SceneManager_pushScene, mapId, arg2);
+			ctext::companion::CompanionExport::Get().OnMapScene(sceneIndex);
+		CALL_ORIG(SceneManager_pushScene, sceneIndex, arg2);
 	}
 
-	HOOK(SceneManager_NextScene, __fastcall, int, mapId) {
+	HOOK(SceneManager_NextScene, __fastcall, int sceneIndex) {
 		if (ctext::Config::Get().CompanionEnabled)
-			ctext::companion::CompanionExport::Get().OnMapScene(mapId);
-		CALL_ORIG(SceneManager_NextScene, mapId);
+			ctext::companion::CompanionExport::Get().OnMapScene(sceneIndex);
+		CALL_ORIG(SceneManager_NextScene, sceneIndex);
 	}
 }
 
