@@ -56,16 +56,20 @@ export namespace ctext::companion {
 
 		/** Fallback only — pushScene's first arg is a scene type (often 0), not the map index. */
 		void OnMapScene(int id) {
-			if (id > 0)
+			if (id > 0) {
 				mapSceneId_.store(id, std::memory_order_relaxed);
+			}
+			else {
+				mapSceneId_.store(-1, std::memory_order_relaxed);
+				probeValid_.store(false, std::memory_order_relaxed);
+			}
 			exportRequested_ = true;
 		}
 
+		/** Called on the game thread from FieldImpl hook — copy values, never retain impl*. */
 		void OnFieldImpl(ct::FieldImpl* impl) {
 			if (!impl)
 				return;
-
-			fieldImpl_.store(impl, std::memory_order_relaxed);
 
 			const int mapId = PickMapSceneId(impl);
 			if (mapId > 0)
@@ -75,6 +79,12 @@ export namespace ctext::companion {
 				playerX_.store(impl->dword854[38], std::memory_order_relaxed);
 				playerY_.store(impl->dword854[41], std::memory_order_relaxed);
 			}
+
+			probeBA0_.store(impl->dwordBA0, std::memory_order_relaxed);
+			probeBBC_.store(impl->dwordBBC, std::memory_order_relaxed);
+			probeBB8_.store(impl->dwordBB8, std::memory_order_relaxed);
+			probeBC0_.store(impl->wordBC0, std::memory_order_relaxed);
+			probeValid_.store(true, std::memory_order_relaxed);
 
 			exportRequested_ = true;
 		}
@@ -134,21 +144,6 @@ export namespace ctext::companion {
 			return -1;
 		}
 
-		void RefreshFromFieldImpl() {
-			auto* impl = fieldImpl_.load(std::memory_order_relaxed);
-			if (!impl)
-				return;
-
-			const int mapId = PickMapSceneId(impl);
-			if (mapId > 0)
-				mapSceneId_.store(mapId, std::memory_order_relaxed);
-
-			if (impl->dword854) {
-				playerX_.store(impl->dword854[38], std::memory_order_relaxed);
-				playerY_.store(impl->dword854[41], std::memory_order_relaxed);
-			}
-		}
-
 		void ExportOnce() {
 			auto* canvas = ct::ChronoCanvas::getInstance();
 
@@ -171,8 +166,6 @@ export namespace ctext::companion {
 				state["exportStatus"] = "no_canvas";
 			}
 
-			RefreshFromFieldImpl();
-
 			const int mapSceneId = mapSceneId_.load(std::memory_order_relaxed);
 			if (mapSceneId > 0)
 				state["mapSceneId"] = mapSceneId;
@@ -181,12 +174,12 @@ export namespace ctext::companion {
 			state["posX"] = playerX_.load(std::memory_order_relaxed);
 			state["posY"] = playerY_.load(std::memory_order_relaxed);
 
-			if (auto* impl = fieldImpl_.load(std::memory_order_relaxed)) {
+			if (probeValid_.load(std::memory_order_relaxed)) {
 				state["locationProbe"] = {
-					{ "dwordBA0", impl->dwordBA0 },
-					{ "dwordBBC", impl->dwordBBC },
-					{ "dwordBB8", impl->dwordBB8 },
-					{ "wordBC0", impl->wordBC0 },
+					{ "dwordBA0", probeBA0_.load(std::memory_order_relaxed) },
+					{ "dwordBBC", probeBBC_.load(std::memory_order_relaxed) },
+					{ "dwordBB8", probeBB8_.load(std::memory_order_relaxed) },
+					{ "wordBC0", probeBC0_.load(std::memory_order_relaxed) },
 				};
 			}
 
@@ -227,6 +220,10 @@ export namespace ctext::companion {
 		std::atomic<int> mapSceneId_{ -1 };
 		std::atomic<int> playerX_{ 0 };
 		std::atomic<int> playerY_{ 0 };
-		std::atomic<ct::FieldImpl*> fieldImpl_{ nullptr };
+		std::atomic<bool> probeValid_{ false };
+		std::atomic<uint32_t> probeBA0_{ 0 };
+		std::atomic<uint32_t> probeBBC_{ 0 };
+		std::atomic<uint32_t> probeBB8_{ 0 };
+		std::atomic<uint32_t> probeBC0_{ 0 };
 	};
 }
