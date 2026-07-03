@@ -33,6 +33,14 @@ export namespace ctext::companion {
 
 			exportPath_ = ResolveExportPath(cfg.CompanionExportPath);
 			running_ = true;
+
+			try {
+				std::ofstream probe("ctext_companion.ok", std::ios::trunc);
+				probe << "companion_export_start\n";
+			}
+			catch (...) {
+			}
+
 			worker_ = std::thread([this] { WorkerLoop(); });
 		}
 

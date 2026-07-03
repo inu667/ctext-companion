@@ -16,19 +16,19 @@ export namespace ctext {
 			std::ifstream file("ctext.json");
 			auto cfg = nlohmann::json::parse(file, nullptr, true, true, true);
 
-			FixesRevertDiagonalMovement = cfg["fixes"]["revert_diagonal_movement"];
+			FixesRevertDiagonalMovement = cfg["fixes"].value("revert_diagonal_movement", false);
 
-			GraphicsForceNearestFilter = cfg["graphics"]["force_nearest_filter"];
+			GraphicsForceNearestFilter = cfg["graphics"].value("force_nearest_filter", false);
 
-			FontForceNearestFilter = cfg["font"]["force_nearest_filter"];
-			FontUseCustomFont = cfg["font"]["use_custom_font"];
-			FontCustomFont = cfg["font"]["custom_font"];
-			FontUseFixedFontSize = cfg["font"]["use_fixed_font_size"];
-			FontFixedFontSize = cfg["font"]["fixed_font_size"];
+			FontForceNearestFilter = cfg["font"].value("force_nearest_filter", false);
+			FontUseCustomFont = cfg["font"].value("use_custom_font", false);
+			FontCustomFont = cfg["font"].value("custom_font", "");
+			FontUseFixedFontSize = cfg["font"].value("use_fixed_font_size", false);
+			FontFixedFontSize = cfg["font"].value("fixed_font_size", 16);
 
-			MiscDisableFieldActionIndicator = cfg["misc"]["disable_field_action_indicator"];
+			MiscDisableFieldActionIndicator = cfg["misc"].value("disable_field_action_indicator", false);
 
-			ModsLoadOrder = cfg["mods"]["load_order"];
+			ModsLoadOrder = cfg["mods"].value("load_order", std::vector<std::string>{});
 
 			CompanionEnabled = false;
 			CompanionPollIntervalMs = 1000;
