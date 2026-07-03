@@ -4,28 +4,27 @@ module;
 
 export module ctext.hooks:scene_manager;
 
-import ct.scene;
 import ctext.companion_export;
 import ctext.config;
 
 
 namespace {
-	HOOK(SceneManager_create, __fastcall, int, id, int, a2) {
+	HOOK(SceneManager_create, __fastcall, int, mapId, int, arg2) {
 		if (ctext::Config::Get().CompanionEnabled)
-			ctext::companion::CompanionExport::Get().OnMapScene(id);
-		return CALL_ORIG(SceneManager_create, id, a2);
+			ctext::companion::CompanionExport::Get().OnMapScene(mapId);
+		return CALL_ORIG(SceneManager_create, mapId, arg2);
 	}
 
-	HOOK(SceneManager_pushScene, __fastcall, int, id, int, a2) {
+	HOOK(SceneManager_pushScene, __fastcall, int, mapId, int, arg2) {
 		if (ctext::Config::Get().CompanionEnabled)
-			ctext::companion::CompanionExport::Get().OnMapScene(id);
-		CALL_ORIG(SceneManager_pushScene, id, a2);
+			ctext::companion::CompanionExport::Get().OnMapScene(mapId);
+		CALL_ORIG(SceneManager_pushScene, mapId, arg2);
 	}
 
-	HOOK(SceneManager_NextScene, __fastcall, int, a1) {
+	HOOK(SceneManager_NextScene, __fastcall, int, mapId) {
 		if (ctext::Config::Get().CompanionEnabled)
-			ctext::companion::CompanionExport::Get().OnMapScene(a1);
-		CALL_ORIG(SceneManager_NextScene, a1);
+			ctext::companion::CompanionExport::Get().OnMapScene(mapId);
+		CALL_ORIG(SceneManager_NextScene, mapId);
 	}
 }
 
