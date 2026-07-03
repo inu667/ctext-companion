@@ -54,16 +54,29 @@ export namespace ctext::companion {
 			exportRequested_ = true;
 		}
 
-		/** CTViewer / pushScene map index — unique per field map on PC. */
+		/** Fallback only — pushScene's first arg is a scene type (often 0), not the map index. */
 		void OnMapScene(int id) {
-			if (id >= 0)
+			if (id > 0)
 				mapSceneId_.store(id, std::memory_order_relaxed);
 			exportRequested_ = true;
 		}
 
-		void OnPlayerPosition(int x, int y) {
-			playerX_.store(x, std::memory_order_relaxed);
-			playerY_.store(y, std::memory_order_relaxed);
+		void OnFieldImpl(ct::FieldImpl* impl) {
+			if (!impl)
+				return;
+
+			fieldImpl_.store(impl, std::memory_order_relaxed);
+
+			const int mapId = PickMapSceneId(impl);
+			if (mapId > 0)
+				mapSceneId_.store(mapId, std::memory_order_relaxed);
+
+			if (impl->dword854) {
+				playerX_.store(impl->dword854[38], std::memory_order_relaxed);
+				playerY_.store(impl->dword854[41], std::memory_order_relaxed);
+			}
+
+			exportRequested_ = true;
 		}
 
 	private:
@@ -101,11 +114,46 @@ export namespace ctext::companion {
 			}
 		}
 
+		static int PickMapSceneId(ct::FieldImpl* impl) {
+			if (!impl)
+				return -1;
+
+			// CTViewer / mapinfo index — dwordBA0 is the reliable per-map id on PC.
+			const int candidates[] = {
+				static_cast<int>(impl->dwordBA0),
+				static_cast<int>(impl->dwordBBC),
+				static_cast<int>(impl->dwordBB8),
+				static_cast<int>(impl->wordBC0),
+			};
+
+			for (const int id : candidates) {
+				if (id > 0)
+					return id;
+			}
+
+			return -1;
+		}
+
+		void RefreshFromFieldImpl() {
+			auto* impl = fieldImpl_.load(std::memory_order_relaxed);
+			if (!impl)
+				return;
+
+			const int mapId = PickMapSceneId(impl);
+			if (mapId > 0)
+				mapSceneId_.store(mapId, std::memory_order_relaxed);
+
+			if (impl->dword854) {
+				playerX_.store(impl->dword854[38], std::memory_order_relaxed);
+				playerY_.store(impl->dword854[41], std::memory_order_relaxed);
+			}
+		}
+
 		void ExportOnce() {
 			auto* canvas = ct::ChronoCanvas::getInstance();
 
 			nlohmann::json state;
-			state["version"] = 2;
+			state["version"] = 3;
 			state["source"] = "ctext";
 
 			if (canvas) {
@@ -123,13 +171,24 @@ export namespace ctext::companion {
 				state["exportStatus"] = "no_canvas";
 			}
 
+			RefreshFromFieldImpl();
+
 			const int mapSceneId = mapSceneId_.load(std::memory_order_relaxed);
-			if (mapSceneId >= 0)
+			if (mapSceneId > 0)
 				state["mapSceneId"] = mapSceneId;
 			else
 				state["mapSceneId"] = nullptr;
 			state["posX"] = playerX_.load(std::memory_order_relaxed);
 			state["posY"] = playerY_.load(std::memory_order_relaxed);
+
+			if (auto* impl = fieldImpl_.load(std::memory_order_relaxed)) {
+				state["locationProbe"] = {
+					{ "dwordBA0", impl->dwordBA0 },
+					{ "dwordBBC", impl->dwordBBC },
+					{ "dwordBB8", impl->dwordBB8 },
+					{ "wordBC0", impl->wordBC0 },
+				};
+			}
 
 			if (Config::Get().CompanionStorylineRva != 0) {
 				auto* storyline = ADDR_AS(uint8_t*, Config::Get().CompanionStorylineRva);
@@ -168,5 +227,6 @@ export namespace ctext::companion {
 		std::atomic<int> mapSceneId_{ -1 };
 		std::atomic<int> playerX_{ 0 };
 		std::atomic<int> playerY_{ 0 };
+		std::atomic<ct::FieldImpl*> fieldImpl_{ nullptr };
 	};
 }

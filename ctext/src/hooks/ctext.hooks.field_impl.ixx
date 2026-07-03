@@ -11,13 +11,8 @@ import ctext.companion_export;
 
 namespace {
 	HOOK_CLSFN(FieldImpl_UserScrollDiagonal, ct::FieldImpl, int x, int y, bool a3, bool a4, bool a5) {
-		if (ctext::Config::Get().CompanionEnabled) {
-			auto* coords = _this->dword854;
-			if (coords) {
-				ctext::companion::CompanionExport::Get().OnPlayerPosition(coords[38], coords[41]);
-				ctext::companion::CompanionExport::Get().RequestExport();
-			}
-		}
+		if (ctext::Config::Get().CompanionEnabled)
+			ctext::companion::CompanionExport::Get().OnFieldImpl(_this);
 
 		if (ctext::Config::Get().FixesRevertDiagonalMovement) {
 			auto* dword854 = _this->dword854;

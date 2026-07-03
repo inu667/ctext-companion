@@ -45,14 +45,15 @@ Launch Chrono Trigger from Steam. The companion **Game link** panel should show
 **map scene** ID (unique per map). `fieldId` is also exported for debug but
 **repeats across different places on PC** — do not use it alone for location.
 
-Export JSON (v2) includes:
+Export JSON (v3) includes:
 
 | Field | Meaning |
 |-------|---------|
-| `mapSceneId` | `pushScene` map index — **use this for location mapping** |
+| `mapSceneId` | `FieldImpl::dwordBA0` (CTViewer / mapinfo index) — **use for location mapping** |
 | `fieldId` | `ChronoCanvas::currentFieldId` — **not unique** on PC |
 | `sceneId` | Scene mode (16 = world map, 17 = field mode) |
-| `posX`, `posY` | Player tile position (updated on movement) |
+| `posX`, `posY` | Player tile position (from `FieldImpl`, polled each export) |
+| `locationProbe` | Debug: dwordBA0/BBC/BB8/BC0 if map id wrong |
 
 ## Config (`ctext.json`)
 
