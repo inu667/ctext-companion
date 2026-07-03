@@ -54,15 +54,17 @@ export namespace ctext::companion {
 			exportRequested_ = true;
 		}
 
-		/** Fallback only — pushScene's first arg is a scene type (often 0), not the map index. */
+		/** Fallback — pushScene's first arg is often 0 (scene type), not the map index. */
 		void OnMapScene(int id) {
-			if (id > 0) {
+			if (id > 0)
 				mapSceneId_.store(id, std::memory_order_relaxed);
-			}
-			else {
-				mapSceneId_.store(-1, std::memory_order_relaxed);
-				probeValid_.store(false, std::memory_order_relaxed);
-			}
+			exportRequested_ = true;
+		}
+
+		/** Primary source — CTViewer scene index from mapinfo_N.dat load. */
+		void OnMapinfoIndex(int index) {
+			if (index > 0)
+				mapSceneId_.store(index, std::memory_order_relaxed);
 			exportRequested_ = true;
 		}
 

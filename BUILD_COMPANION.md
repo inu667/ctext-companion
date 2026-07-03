@@ -49,7 +49,7 @@ Export JSON (v3) includes:
 
 | Field | Meaning |
 |-------|---------|
-| `mapSceneId` | `FieldImpl::dwordBA0` (CTViewer / mapinfo index) — **use for location mapping** |
+| `mapSceneId` | Parsed from `mapinfo_N.dat` on map load (CTViewer scene index) — **use for location mapping** |
 | `fieldId` | `ChronoCanvas::currentFieldId` — **not unique** on PC |
 | `sceneId` | Scene mode (16 = world map, 17 = field mode) |
 | `posX`, `posY` | Player tile position (from `FieldImpl`, polled each export) |

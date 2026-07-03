@@ -9,6 +9,7 @@ export module ctext.hooks:detchman_resource;
 
 import ctext.config;
 import ctext.io;
+import ctext.companion_export;
 
 import std;
 
@@ -18,6 +19,32 @@ import std;
 namespace {
 	std::vector<mz_zip_archive*> loadedCtpArchives;
 	std::unordered_map<std::string, ctext::io::FileEntry*> overridenFilepaths;
+
+	int ParseMapinfoIndex(const std::string& filename) {
+		std::string lower = filename;
+		std::transform(
+			lower.begin(),
+			lower.end(),
+			lower.begin(),
+			[](unsigned char c) { return static_cast<char>(std::tolower(c)); }
+		);
+
+		constexpr char needle[] = "mapinfo_";
+		const auto pos = lower.find(needle);
+		if (pos == std::string::npos)
+			return -1;
+
+		size_t i = pos + (sizeof(needle) - 1);
+		int value = 0;
+		bool any = false;
+		while (i < lower.size() && lower[i] >= '0' && lower[i] <= '9') {
+			value = value * 10 + (lower[i] - '0');
+			++i;
+			any = true;
+		}
+
+		return any ? value : -1;
+	}
 
 
 	void LoadCtpArchive(const std::filesystem::path& path) {
@@ -53,6 +80,12 @@ namespace {
 #if LOG_RES_HOOK
 		LOG_DEBUG("RES_HOOK: " << filename);
 #endif
+
+		if (ctext::Config::Get().CompanionEnabled) {
+			const int mapIndex = ParseMapinfoIndex(filename);
+			if (mapIndex > 0)
+				ctext::companion::CompanionExport::Get().OnMapinfoIndex(mapIndex);
+		}
 
 		std::string lcFilename = filename;
 		std::transform(
